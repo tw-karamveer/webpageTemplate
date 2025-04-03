@@ -137,6 +137,11 @@ async function initializePage() {
         // Get device type from URL
         const deviceType = getUrlParameter('device');
         
+        // If no device type is specified, use default content
+        if (!deviceType) {
+            return; // Keep the default content from HTML
+        }
+        
         // Fetch device data
         const response = await fetch('devices.json');
         const data = await response.json();
@@ -159,5 +164,52 @@ async function initializePage() {
     }
 }
 
-// Initialize the page when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializePage); 
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize page content
+    initializePage();
+    
+    // Initialize scroll animations
+    const animateElements = [
+        ...document.querySelectorAll('.features-grid .feature-card'),
+        ...document.querySelectorAll('.about-content > *'),
+        document.querySelector('.contact-form'),
+        ...document.querySelectorAll('.footer-section')
+    ];
+
+    // Add fade-in class and observe each element
+    animateElements.forEach(element => {
+        if (element) {
+            element.classList.add('fade-in');
+            observer.observe(element);
+        }
+    });
+
+    // Initialize mobile menu
+    const menuToggle = document.querySelector('.menu-toggle');
+    const mobileNavLinks = document.querySelector('.nav-links');
+
+    if (menuToggle && mobileNavLinks) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            mobileNavLinks.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileNavLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+                mobileNavLinks.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileNavLinks.classList.remove('active');
+            });
+        });
+    }
+
+    // Initialize navigation active state
+    updateActiveLink();
+}); 
